@@ -2,7 +2,7 @@
 
 ## Installation
 
-Download the latest release of the docset [from the releases page](). If you want to generate the docset yourself, follow the steps in "Usage" below.
+Download the latest release of the docset [from the releases page](releases). If you want to generate the docset yourself, follow the steps in "Usage" below.
 
 ## Usage
 
