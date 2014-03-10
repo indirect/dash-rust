@@ -107,7 +107,7 @@ private
     p [name, type, path] if @debug
 
     # Sqlite3 single quote escape is two single quotes
-    [name, type, path].each{|arg| arg.gsub!("'", "''") }
+    [name, type, path].each{|arg| arg.to_s.gsub!("'", "''") }
     execute("INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('#{name}', '#{type}', '#{path}');")
   end
 
