@@ -12,6 +12,7 @@ class DocsetIndex
     "tymethod" => "Method",
     "typedef" => "Type",
     "variant" => "Option",
+    "macro" => "Macro"
   }
 
   def initialize(dir)
@@ -106,9 +107,13 @@ private
   def add(name, type, path)
     p [name, type, path] if @debug
 
-    # Sqlite3 single quote escape is two single quotes
-    [name, type, path].each{|arg| arg.to_s.gsub!("'", "''") }
-    execute("INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('#{name}', '#{type}', '#{path}');")
+    if type.nil?
+      puts "UNKNOWN TYPE #{type}"
+    else
+      # Sqlite3 single quote escape is two single quotes
+      [name, type, path].each{|arg| arg.to_s.gsub!("'", "''") }
+      execute("INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('#{name}', '#{type}', '#{path}');")
+    end
   end
 
 end
