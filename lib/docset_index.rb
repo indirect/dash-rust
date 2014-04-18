@@ -55,7 +55,7 @@ class DocsetIndex
     Dir["#{@dir}/**/search-index.js"].each do |jsfile|
       puts "Indexing #{jsfile.split("/")[-2]}..."
 
-      items, paths = File.read(jsfile).
+      items, paths = File.open(jsfile, "r:UTF-8", &:read).
         scan(/(?:searchIndex|allPaths) \= (.*?)(?:;var|;$)/).
         flatten.
         map{|js| js.gsub("},{", "},\n{") }.
