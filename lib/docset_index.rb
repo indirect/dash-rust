@@ -154,7 +154,7 @@ private
     p [name, type, path] if @debug
 
     if type.nil?
-      puts "UNKNOWN TYPE #{type}"
+      puts "UNKNOWN TYPE for #{name} (#{path})"
     else
       # Sqlite3 single quote escape is two single quotes
       [name, type, path].each{|arg| arg.to_s.gsub!("'", "''") }
