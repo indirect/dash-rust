@@ -2,16 +2,17 @@ class DocsetIndex
   DASH_TYPE = {
     "enum" => "Enum",
     "ffi" => "Function",
+    "ffs" => "Constant",
     "fn" => "Function",
     "method" => "Method",
     "mod" => "Module",
     "static" => "Constant",
-    "struct" => "Class",
-    "structfield" => "Attribute",
-    "trait" => "Protocol",
+    "struct" => "_Struct",
+    "structfield" => "Field",
+    "trait" => "Trait",
     "tymethod" => "Method",
     "typedef" => "Type",
-    "variant" => "Option",
+    "variant" => "Variant",
     "macro" => "Macro"
   }
 
