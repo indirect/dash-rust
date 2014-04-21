@@ -15,6 +15,25 @@ class DocsetIndex
     "macro" => "Macro"
   }
 
+  ITEM_TYPE = {
+    0 => "mod",
+    1 => "struct",
+    2 => "enum",
+    3 => "fn",
+    4 => "typedef",
+    5 => "static",
+    6 => "trait",
+    7 => "impl",
+    8 => "viewitem",
+    9 => "tymethod",
+    10 => "method",
+    11 => "structfield",
+    12 => "variant",
+    13 => "ffi",
+    14 => "ffs",
+    15 => "macro"
+  }
+
   def initialize(dir)
     @dir = dir
     @debug = true if ENV['DEBUG']
@@ -50,25 +69,51 @@ class DocsetIndex
   end
 
   def index_docs_search_indexes
-    require 'json'
-    # Parse and index everything that can be searched for
-    Dir["#{@dir}/**/search-index.js"].each do |jsfile|
-      puts "Indexing #{jsfile.split("/")[-2]}..."
+    require 'execjs'
 
-      items, paths = File.open(jsfile, "r:UTF-8", &:read).
-        scan(/(?:searchIndex|allPaths) \= (.*?)(?:;var|;$)/).
-        flatten.
-        map{|js| js.gsub("},{", "},\n{") }.
-        map{|js| js.gsub(/\:'(.*?)'/m, ':"\1"') }.
-        map{|js| js.gsub(/'(.*?)'\:/, '"\1":') }.
-        map{|js| js.gsub(/([{,])(\w*)\:/, '\1"\2":') }.
-        map{|json| JSON.parse(json) }
+    jsfile = File.join(@dir, "search-index.js")
+
+    source = File.open(jsfile, "r:UTF-8", &:read)
+    context = ExecJS.compile(source + ";function initSearch() {}")
+    crates = context.eval("searchIndex")
+
+    crates.keys.each do |crate_key|
+      puts "Indexing crate #{crate_key}..."
+      crate = crates[crate_key]
+      items, paths = crate.values_at("items", "paths")
+
+      paths = paths.map do |p|
+        {
+          "ty" => ITEM_TYPE[p[0]],
+          "name" => p[1]
+        }
+      end
+
+      # rustdoc changed to use an array for items here:
+      #   https://github.com/mozilla/rust/commit/f6854ab46c1303cfee508a4537e235166cd6cc3e
+      # and omit repeated paths here:
+      #   https://github.com/mozilla/rust/commit/8f5d71cf71849bea25f87836cec1b06b476baf37
+      last_path = ""
+      items = items.map do |i|
+        path = if i[2].empty? then last_path else i[2] end
+        row = {
+          "ty" => ITEM_TYPE[i[0]],
+          "name" => i[1],
+          "path" => path,
+          "desc" => i[3], # unused
+          "parent" => i[4]
+        }
+        last_path = path
+        row
+      end
 
       items.each do |i|
         if i["parent"]
-          next if paths[i["parent"]].nil?
+          parent = paths[i["parent"]]
+          next if parent.nil?
+
           path = i["path"] + "/"
-          path << paths[i["parent"]].values.join(".") << ".html"
+          path << parent["ty"] << "." << parent["name"] << ".html"
           path << "#" << [i["ty"], i["name"]].join(".")
         else
           if i["name"].empty?

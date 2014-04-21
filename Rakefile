@@ -1,3 +1,5 @@
+require 'rubygems'
+require 'bundler/setup'
 require './lib/docset_index'
 
 task :default => %w(docset)
@@ -28,6 +30,7 @@ file "Rust.docset/Contents/Resources/Documents" => [
   "Rust.docset/Contents/Resources"
 ] do
   local_docs = [
+    File.expand_path("~/Desktop/rust-nightly-x86_64-unknown-linux-gnu/doc"),
     File.expand_path("~/src/mozilla/rust/doc"),
     ENV['RUST_DOCS']
   ].find{|path| path && File.exist?(path) }
