@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>Rust</string>
+	<string>rust-nightly</string>
 	<key>CFBundleName</key>
-	<string>Rust</string>
+	<string>Rust Nightly</string>
 	<key>DocSetPlatformFamily</key>
-	<string>Rust</string>
+	<string>rust</string>
 	<key>isDashDocset</key>
 	<true/>
   <key>dashIndexFilePath</key>
