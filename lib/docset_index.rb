@@ -109,6 +109,8 @@ class DocsetIndex
       end
 
       items.each do |i|
+        parent = nil
+
         if i["parent"]
           parent = paths[i["parent"]]
           next if parent.nil?
@@ -127,11 +129,11 @@ class DocsetIndex
           end
         end
 
-        if i["ty"] == "fn"
-          name = [i["path"], i["name"]].join("::")
-        else
-          name = i["name"]
-        end
+        name = if parent.nil?
+                 [i["path"], i["name"]].join("::")
+               else
+                 [i["path"], parent["name"], i["name"]].compact.join("::")
+               end
 
         add name, DASH_TYPE[i["ty"]], path.gsub("::", "/")
       end
