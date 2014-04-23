@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'bundler/setup'
 require './lib/docset_index'
+require './lib/docset_theme'
 
 task :default => %w(docset)
 
@@ -9,7 +10,8 @@ task :docset => [
   "Rust.docset/icon.png",
   "Rust.docset/Contents/Info.plist",
   "Rust.docset/Contents/Resources/Documents",
-  "docset:index"
+  "docset:index",
+  "docset:theme"
 ]
 
 directory "Rust.docset/Contents/Resources"
@@ -43,6 +45,16 @@ file "Rust.docset/Contents/Resources/Documents" => [
   cp_r local_docs, "Rust.docset/Contents/Resources/Documents"
 end
 
+file "Rust.docset/Contents/Resources/Documents/main.css.orig" => [
+  "Rust.docset/Contents/Resources/Documents"
+] do
+  doc_path = "Rust.docset/Contents/Resources/Documents"
+  stylesheet = File.join(doc_path, "main.css")
+  cp stylesheet, "#{stylesheet}.orig"
+
+  DocsetTheme.new(stylesheet).save
+end
+
 file "Rust.docset/Contents/Resources/docSet.dsidx" => [
   "Rust.docset/Contents/Resources"
 ] do
@@ -59,6 +71,18 @@ namespace :docset do
   task :reindex do
     rm_rf "Rust.docset/Contents/Resources/docSet.dsidx"
     Rake::Task["docset:index"].invoke
+  end
+
+  desc "Apply some Dash-friendly CSS to the docs stylesheet"
+  task :theme => [
+    "Rust.docset/Contents/Resources/Documents/main.css.orig"
+  ]
+
+  task :retheme do
+    doc_path = "Rust.docset/Contents/Resources/Documents"
+    cp File.join(doc_path, "main.css.orig"), File.join(doc_path, "main.css")
+    rm File.join(doc_path, "main.css.orig")
+    Rake::Task["docset:theme"].invoke
   end
 end
 
