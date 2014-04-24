@@ -2,17 +2,37 @@ class DocsetIndex
   DASH_TYPE = {
     "enum" => "Enum",
     "ffi" => "Function",
+    "ffs" => "Constant",
     "fn" => "Function",
     "method" => "Method",
     "mod" => "Module",
     "static" => "Constant",
-    "struct" => "Class",
-    "structfield" => "Attribute",
-    "trait" => "Protocol",
+    "struct" => "_Struct",
+    "structfield" => "Field",
+    "trait" => "Trait",
     "tymethod" => "Method",
     "typedef" => "Type",
-    "variant" => "Option",
+    "variant" => "Variant",
     "macro" => "Macro"
+  }
+
+  ITEM_TYPE = {
+    0 => "mod",
+    1 => "struct",
+    2 => "enum",
+    3 => "fn",
+    4 => "typedef",
+    5 => "static",
+    6 => "trait",
+    7 => "impl",
+    8 => "viewitem",
+    9 => "tymethod",
+    10 => "method",
+    11 => "structfield",
+    12 => "variant",
+    13 => "ffi",
+    14 => "ffs",
+    15 => "macro"
   }
 
   def initialize(dir)
@@ -37,10 +57,9 @@ class DocsetIndex
     # Parse and index guides from the docs root
     rustdoc = Nokogiri::HTML(File.read("#{@dir}/index.html"))
     [
-      "body > ul > li",
-      "section#guides li",
-      "section#tooling li",
-      "section#faq li",
+      "#guides + ul li",
+      "#tooling + ul li",
+      "#faqs + ul li",
     ].each do |selector|
       rustdoc.css(selector).each do |item|
         link = item.css("a").first
@@ -50,25 +69,53 @@ class DocsetIndex
   end
 
   def index_docs_search_indexes
-    require 'json'
-    # Parse and index everything that can be searched for
-    Dir["#{@dir}/**/search-index.js"].each do |jsfile|
-      puts "Indexing #{jsfile.split("/")[-2]}..."
+    require 'execjs'
 
-      items, paths = File.read(jsfile).
-        scan(/(?:searchIndex|allPaths) \= (.*?)(?:;var|;$)/).
-        flatten.
-        map{|js| js.gsub("},{", "},\n{") }.
-        map{|js| js.gsub(/\:'(.*?)'/m, ':"\1"') }.
-        map{|js| js.gsub(/'(.*?)'\:/, '"\1":') }.
-        map{|js| js.gsub(/([{,])(\w*)\:/, '\1"\2":') }.
-        map{|json| JSON.parse(json) }
+    jsfile = File.join(@dir, "search-index.js")
+
+    source = File.open(jsfile, "r:UTF-8", &:read)
+    context = ExecJS.compile(source + ";function initSearch() {}")
+    crates = context.eval("searchIndex")
+
+    crates.keys.each do |crate_key|
+      puts "Indexing crate #{crate_key}..."
+      crate = crates[crate_key]
+      items, paths = crate.values_at("items", "paths")
+
+      paths = paths.map do |p|
+        {
+          "ty" => ITEM_TYPE[p[0]],
+          "name" => p[1]
+        }
+      end
+
+      # rustdoc changed to use an array for items here:
+      #   https://github.com/mozilla/rust/commit/f6854ab46c1303cfee508a4537e235166cd6cc3e
+      # and omit repeated paths here:
+      #   https://github.com/mozilla/rust/commit/8f5d71cf71849bea25f87836cec1b06b476baf37
+      last_path = ""
+      items = items.map do |i|
+        path = if i[2].empty? then last_path else i[2] end
+        row = {
+          "ty" => ITEM_TYPE[i[0]],
+          "name" => i[1],
+          "path" => path,
+          "desc" => i[3], # unused
+          "parent" => i[4]
+        }
+        last_path = path
+        row
+      end
 
       items.each do |i|
+        parent = nil
+
         if i["parent"]
-          next if paths[i["parent"]].nil?
+          parent = paths[i["parent"]]
+          next if parent.nil?
+
           path = i["path"] + "/"
-          path << paths[i["parent"]].values.join(".") << ".html"
+          path << parent["ty"] << "." << parent["name"] << ".html"
           path << "#" << [i["ty"], i["name"]].join(".")
         else
           if i["name"].empty?
@@ -81,11 +128,11 @@ class DocsetIndex
           end
         end
 
-        if i["ty"] == "fn"
-          name = [i["path"], i["name"]].join("::")
-        else
-          name = i["name"]
-        end
+        name = if parent.nil?
+                 [i["path"], i["name"]].join("::")
+               else
+                 [i["path"], parent["name"], i["name"]].compact.join("::")
+               end
 
         add name, DASH_TYPE[i["ty"]], path.gsub("::", "/")
       end
@@ -108,7 +155,7 @@ private
     p [name, type, path] if @debug
 
     if type.nil?
-      puts "UNKNOWN TYPE #{type}"
+      puts "UNKNOWN TYPE for #{name} (#{path})"
     else
       # Sqlite3 single quote escape is two single quotes
       [name, type, path].each{|arg| arg.to_s.gsub!("'", "''") }
