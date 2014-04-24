@@ -57,10 +57,9 @@ class DocsetIndex
     # Parse and index guides from the docs root
     rustdoc = Nokogiri::HTML(File.read("#{@dir}/index.html"))
     [
-      "body > ul > li",
-      "section#guides li",
-      "section#tooling li",
-      "section#faq li",
+      "#guides + ul li",
+      "#tooling + ul li",
+      "#faqs + ul li",
     ].each do |selector|
       rustdoc.css(selector).each do |item|
         link = item.css("a").first
