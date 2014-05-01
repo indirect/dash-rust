@@ -1,5 +1,3 @@
-require 'rubygems'
-require 'bundler/setup'
 require './lib/docset_index'
 require './lib/docset_theme'
 require './lib/docset_fetch_assets'
