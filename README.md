@@ -7,11 +7,10 @@ Download the latest release of the docset [from the releases page](https://githu
 ## Usage
 
 ```bash
+$ bundle install
 $ rake
 $ open Rust.docset
 ```
-
-There is no step three!
 
 ### License
 
