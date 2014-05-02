@@ -44,6 +44,15 @@ file "Rust.docset/Contents/Resources/Documents" => [
     gets.chomp
   end
 
+  if !File.exist?(local_docs + "/index.html")
+    if File.exist?(local_docs + "/doc/index.html")
+		local_docs += "/doc"
+	else
+		puts "Path " + local_docs + " is not a rust doc directory!"
+		exit 1
+	end
+  end
+
   cp_r local_docs, "Rust.docset/Contents/Resources/Documents"
 end
 
