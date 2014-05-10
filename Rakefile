@@ -1,7 +1,5 @@
 require './lib/docset_index'
 require './lib/docset_theme'
-require './lib/docset_fetch_assets'
-require './lib/docset_replace_assets'
 
 task :default => %w(docset)
 
@@ -11,9 +9,7 @@ task :docset => [
   "Rust.docset/Contents/Info.plist",
   "Rust.docset/Contents/Resources/Documents",
   "docset:index",
-  "docset:theme",
-  "docset:assets:fetch",
-  "docset:assets:replace"
+  "docset:theme"
 ]
 
 directory "Rust.docset/Contents/Resources"
@@ -94,24 +90,6 @@ namespace :docset do
     cp File.join(doc_path, "main.css.orig"), File.join(doc_path, "main.css")
     rm File.join(doc_path, "main.css.orig")
     Rake::Task["docset:theme"].invoke
-  end
-
-  namespace :assets do
-    doc_path = "Rust.docset/Contents/Resources/Documents"
-    stylesheet = File.expand_path(File.join(doc_path, "main.css"))
-    asset_path = File.expand_path(File.join(doc_path, "_assets"))
-
-    desc "Fetch remote assets"
-    task :fetch do
-      mkdir_p asset_path
-
-      DocsetFetchAssets.new(stylesheet, asset_path).save
-    end
-
-    desc "Replace references to remote assets with local ones"
-    task :replace => FileList[File.join(asset_path, "fonts", "*.woff")] do
-      DocsetReplaceAssets.new(stylesheet).save
-    end
   end
 end
 
