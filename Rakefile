@@ -12,6 +12,22 @@ task :docset => [
   "docset:theme"
 ]
 
+file "rust-nightly-x86_64-unknown-linux-gnu.tar.gz" do
+  sh "curl -O http://static.rust-lang.org/dist/rust-nightly-x86_64-unknown-linux-gnu.tar.gz"
+end
+
+file "rust-nightly-x86_64-unknown-linux-gnu" => "rust-nightly-x86_64-unknown-linux-gnu.tar.gz" do
+  sh "tar -xzf rust-nightly-x86_64-unknown-linux-gnu.tar.gz"
+end
+
+task :nightly_prep do
+  rm "rust-nightly-x86_64-unknown-linux-gnu.tar.gz"
+  rm_rf "rust-nightly-x86_64-uknown-linux-gnu"
+  ENV["RUST_DOCS"] = "rust-nightly-x86_64-unknown-linux-gnu"
+end
+
+task :nightly => [:clean, :nightly_prep, "rust-nightly-x86_64-unknown-linux-gnu", :docset]
+
 directory "Rust.docset/Contents/Resources"
 
 file "Rust.docset/Contents/Info.plist" => [
