@@ -1,2 +1,4 @@
 rustdoc
 Rust.docset
+/rust-nightly-x86_64-unknown-linux-gnu/
+/rust-nightly-x86_64-unknown-linux-gnu.tar.gz

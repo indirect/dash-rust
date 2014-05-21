@@ -21,11 +21,12 @@ file "rust-nightly-x86_64-unknown-linux-gnu" => "rust-nightly-x86_64-unknown-lin
 end
 
 task :nightly_prep do
-  rm "rust-nightly-x86_64-unknown-linux-gnu.tar.gz"
-  rm_rf "rust-nightly-x86_64-uknown-linux-gnu"
+  rm "rust-nightly-x86_64-unknown-linux-gnu.tar.gz", force: true
+  rm_rf "rust-nightly-x86_64-unknown-linux-gnu"
   ENV["RUST_DOCS"] = "rust-nightly-x86_64-unknown-linux-gnu"
 end
 
+desc "Download latest nightly docs and build a fresh docset"
 task :nightly => [:clean, :nightly_prep, "rust-nightly-x86_64-unknown-linux-gnu", :docset]
 
 directory "Rust.docset/Contents/Resources"
