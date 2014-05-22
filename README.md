@@ -12,6 +12,15 @@ $ rake
 $ open Rust.docset
 ```
 
+To download the documentation for the latest Rust nightly and build a
+fresh docset from that:
+
+```bash
+$ bundle install
+$ rake nightly
+$ open Rust.docset
+```
+
 ### License
 
 MIT License, copyright 2014 by André Arko
