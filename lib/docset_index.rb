@@ -5,6 +5,7 @@ class DocsetIndex
     "fn" => "Function",
     "method" => "Method",
     "mod" => "Module",
+    "primitive" => "Type",
     "static" => "Constant",
     "struct" => "_Struct",
     "structfield" => "Field",
@@ -15,24 +16,25 @@ class DocsetIndex
     "macro" => "Macro"
   }
 
-  ITEM_TYPE = {
-    0 => "mod",
-    1 => "struct",
-    2 => "type",
-    3 => "fn",
-    4 => "type",
-    5 => "static",
-    6 => "trait",
-    7 => "impl",
-    8 => "viewitem",
-    9 => "tymethod",
-    10 => "method",
-    11 => "structfield",
-    12 => "variant",
-    13 => "ffi",
-    14 => "ffs",
-    15 => "macro"
-  }
+  ITEM_TYPE = [
+    "mod",
+    "struct",
+    "type",
+    "fn",
+    "type",
+    "static",
+    "trait",
+    "impl",
+    "viewitem",
+    "tymethod",
+    "method",
+    "structfield",
+    "variant",
+    "ffi",
+    "ffs",
+    "macro",
+    "primitive"
+  ]
 
   def initialize(dir)
     @dir = dir
