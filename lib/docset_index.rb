@@ -12,7 +12,8 @@ class DocsetIndex
     "tymethod" => "Method",
     "type" => "Type",
     "variant" => "Variant",
-    "macro" => "Macro"
+    "macro" => "Macro",
+    "primitive" => "Primitive"
   }
 
   ITEM_TYPE = {
@@ -31,7 +32,8 @@ class DocsetIndex
     12 => "variant",
     13 => "ffi",
     14 => "ffs",
-    15 => "macro"
+    15 => "macro",
+    16 => "primitive"
   }
 
   def initialize(dir)
