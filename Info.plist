@@ -13,6 +13,6 @@
   <key>dashIndexFilePath</key>
   <string>index.html</string>
   <key>DashDocSetFamily</key>
-  <string>dashtoc2</string>
+  <string>dashtoc</string>
 </dict>
 </plist>
