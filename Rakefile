@@ -1,5 +1,6 @@
 require './lib/docset_index'
 require './lib/docset_theme'
+require './lib/docset_addrefs'
 
 task :default => %w(docset)
 
@@ -67,6 +68,10 @@ file "Rust.docset/Contents/Resources/Documents" => [
   end
 
   cp_r local_docs, "Rust.docset/Contents/Resources/Documents"
+  puts "Generating TOC"
+  FileList["Rust.docset/Contents/Resources/Documents/**/*.html"].each do |f|
+    DocsetAddrefs.new(f, f).add_refs
+  end
 end
 
 file "Rust.docset/Contents/Resources/Documents/main.css.orig" => [
