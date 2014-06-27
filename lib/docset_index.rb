@@ -1,3 +1,5 @@
+require 'sqlite3'
+
 class DocsetIndex
   DASH_TYPE = {
     "ffi" => "Function",
@@ -42,18 +44,22 @@ class DocsetIndex
   end
 
   def save
-    create_db
-    index_docs_index_page
-    index_docs_search_indexes
+    SQLite3::Database.new(dsidx_path) do |db|
+      create_table(db)
+      index_docs_index_page(db)
+      db.transaction do |trans_db|
+        index_docs_search_indexes(trans_db)
+      end
+    end.close
   end
 
-  def create_db
-    execute "CREATE TABLE searchIndex(id INTEGER PRIMARY KEY, " \
-      "name TEXT, type TEXT, path TEXT);",
-      "CREATE UNIQUE INDEX anchor ON searchIndex (name, type, path);"
+  def create_table(db)
+    db.execute "CREATE TABLE searchIndex(id INTEGER PRIMARY KEY, " \
+               "name TEXT, type TEXT, path TEXT)"
+    db.execute "CREATE UNIQUE INDEX anchor ON searchIndex (name, type, path)"
   end
 
-  def index_docs_index_page
+  def index_docs_index_page(db)
     require 'nokogiri'
     # Parse and index guides from the docs root
     rustdoc = Nokogiri::HTML(File.read("#{@dir}/index.html"))
@@ -64,12 +70,12 @@ class DocsetIndex
     ].each do |selector|
       rustdoc.css(selector).each do |item|
         link = item.css("a").first
-        add link.text, "Guide", link.attr("href")
+        add db, link.text, "Guide", link.attr("href")
       end
     end
   end
 
-  def index_docs_search_indexes
+  def index_docs_search_indexes(db)
     require 'execjs'
 
     jsfile = File.join(@dir, "search-index.js")
@@ -135,7 +141,7 @@ class DocsetIndex
                  [i["path"], parent["name"], i["name"]].compact.join("::")
                end
 
-        add name, DASH_TYPE[i["ty"]], path.gsub("::", "/")
+        add db, name, DASH_TYPE[i["ty"]], path.gsub("::", "/")
       end
     end
   end
@@ -146,13 +152,7 @@ private
     File.expand_path("../docSet.dsidx", @dir)
   end
 
-  def execute(*cmd)
-    IO.popen("sqlite3 #{dsidx_path}", "w+") do |sql|
-      cmd.each{|l| sql << l }
-    end
-  end
-
-  def add(name, type, path)
+  def add(db, name, type, path)
     p [name, type, path] if @debug
 
     if type.nil?
@@ -160,7 +160,8 @@ private
     else
       # Sqlite3 single quote escape is two single quotes
       [name, type, path].each{|arg| arg.to_s.gsub!("'", "''") }
-      execute("INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES ('#{name}', '#{type}', '#{path}');")
+      db.execute("INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?, ?, ?)",
+                 name, type, path)
     end
   end
 
