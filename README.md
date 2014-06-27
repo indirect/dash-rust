@@ -2,7 +2,7 @@
 
 ## Installation
 
-Download the latest release of the docset [from the releases page](https://github.com/indirect/dash-rust/releases). If you want to generate the docset yourself, follow the steps in "Usage" below.
+Subscribe to the [Docset feed (redirects to a `dash-feed://`)](http://docset.crystae.net/feeds/Rust_Nightly.dash-feed). New versions are built with the latest nightly of Rust and published to the feed daily. If you want to generate the docset yourself, follow the steps in "Usage" below.
 
 ## Usage
 
