@@ -2,6 +2,7 @@ source "https://rubygems.org/"
 
 gem "execjs"
 gem "nokogiri"
+gem "sqlite3"
 
 group :test do
   gem "rake"
