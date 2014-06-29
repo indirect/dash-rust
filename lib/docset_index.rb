@@ -38,15 +38,16 @@ class DocsetIndex
     "primitive"
   ]
 
-  def initialize(dir)
+  def initialize(dir, guides)
     @dir = dir
+    @guides = guides
     @debug = true if ENV['DEBUG']
   end
 
   def save
     SQLite3::Database.new(dsidx_path) do |db|
       create_table(db)
-      index_docs_index_page(db)
+      index_docs_index_page(db) if @guides
       db.transaction do |trans_db|
         index_docs_search_indexes(trans_db)
       end
