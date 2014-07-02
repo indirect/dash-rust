@@ -6,20 +6,19 @@ Subscribe to the [Docset feed (redirects to a `dash-feed://`)](http://docset.cry
 
 ## Usage
 
-```bash
-$ bundle install
-$ rake
-$ open Rust.docset
-```
-
 To download the documentation for the latest Rust nightly and build a
-fresh docset from that:
+fresh Rust docset from that:
 
 ```bash
 $ bundle install
 $ rake nightly
 $ open Rust.docset
 ```
+
+To generate a docset for your own crate(s), see `example.sh`. N.B. if
+you run `rustdoc` on multiple crates with the sample output directory,
+a docset generated from that directory will include all of those
+crates.
 
 ### License
 
